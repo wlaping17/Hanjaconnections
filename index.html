@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>One Character, Three Languages</title>
+<meta name="description" content="How one Chinese character lives in Korean, Japanese, and Chinese.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23C1272D'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='serif'>學</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600&family=Noto+Serif+KR:wght@500;800&family=Noto+Serif+JP:wght@500;800&family=Noto+Serif+SC:wght@500;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #EEF1F5;
+  --surface: #FFFFFF;
+  --ink: #142033;
+  --muted: #5B6577;
+  --grid: #B9C6DC;
+  --blue: #0B3A82;
+  --seal: #C1272D;
+  --seal-soft: #FBE9E9;
+  --hanja-kr: "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif;
+  --hanja-jp: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --hanja-cn: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1726; --surface: #16223A; --ink: #E6ECF5; --muted: #9AA7BD;
+    --grid: #2C3D5E; --blue: #8FB4FF; --seal: #FF7A70; --seal-soft: #3A1E24;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1726; --surface: #16223A; --ink: #E6ECF5; --muted: #9AA7BD;
+  --grid: #2C3D5E; --blue: #8FB4FF; --seal: #FF7A70; --seal-soft: #3A1E24;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--sans); font-size: 1rem; line-height: 1.6;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.25rem; }
+
+/* Hero */
+.hero {
+  display: grid; grid-template-columns: auto 1fr; gap: 2.5rem; align-items: center;
+  padding: 4rem 0 3rem;
+}
+.hero-char {
+  width: clamp(9rem, 26vw, 15rem); aspect-ratio: 1;
+  display: grid; place-items: center; position: relative;
+  background:
+    linear-gradient(var(--grid), var(--grid)) center / 1px 100% no-repeat,
+    linear-gradient(var(--grid), var(--grid)) center / 100% 1px no-repeat,
+    var(--surface);
+  border: 2px solid var(--blue);
+  font-family: var(--hanja-kr); font-weight: 800; color: var(--blue);
+  font-size: clamp(6rem, 18vw, 10.5rem); line-height: 1;
+}
+.readings { list-style: none; margin: 0 0 1.25rem; padding: 0; display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.readings li { display: flex; flex-direction: column; }
+.readings b { font-size: 1.6rem; font-weight: 600; color: var(--ink); }
+.readings span { font-size: 0.85rem; color: var(--muted); }
+.readings li { opacity: 0; transform: translateY(6px); animation: rise .5s ease forwards; }
+.readings li:nth-child(2) { animation-delay: .25s; }
+.readings li:nth-child(3) { animation-delay: .5s; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .readings li { animation: none; opacity: 1; transform: none; } }
+h1 { font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.1; margin: 0 0 0.75rem; letter-spacing: -0.01em; }
+.lede { color: var(--muted); max-width: 34rem; margin: 0; }
+
+/* Controls */
+.controls { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin: 1rem 0 1.25rem; }
+.filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.filters button {
+  font: inherit; font-size: 0.9rem; padding: 0.4rem 0.9rem; cursor: pointer;
+  border: 1px solid var(--grid); background: var(--surface); color: var(--ink); border-radius: 999px;
+}
+.filters button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--surface); }
+.search {
+  flex: 1 1 14rem; font: inherit; padding: 0.5rem 0.85rem;
+  border: 1px solid var(--grid); background: var(--surface); color: var(--ink); border-radius: 6px;
+}
+:focus-visible { outline: 3px solid var(--seal); outline-offset: 2px; }
+
+/* Manuscript-paper grid */
+.board {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  border-top: 2px solid var(--blue); border-left: 2px solid var(--blue);
+  background: var(--surface);
+}
+.cell {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.35rem; padding: 1.4rem 0.5rem 1rem; min-height: 190px;
+  border: 0; border-right: 1px solid var(--grid); border-bottom: 1px solid var(--grid);
+  background: transparent; color: var(--ink); font: inherit; cursor: pointer; text-align: center;
+}
+.cell:hover { background: var(--paper); }
+.cell .ch { font-family: var(--hanja-kr); font-weight: 800; font-size: 3.6rem; line-height: 1.1; color: var(--blue); }
+.cell .mean { font-size: 0.9rem; color: var(--muted); }
+.cell .tri { display: flex; gap: 0.7rem; font-size: 0.95rem; }
+.seal {
+  position: absolute; top: 0.6rem; right: 0.6rem; width: 1.7rem; height: 1.7rem;
+  display: grid; place-items: center; background: var(--seal); color: var(--surface);
+  font-family: var(--hanja-kr); font-size: 0.95rem; border-radius: 3px; transform: rotate(-6deg);
+}
+.empty { padding: 2rem; color: var(--muted); grid-column: 1 / -1; border-right: 1px solid var(--grid); border-bottom: 1px solid var(--grid); }
+.legend { font-size: 0.88rem; color: var(--muted); margin: 0.75rem 0 0; display: flex; align-items: center; gap: 0.5rem; }
+.legend .seal { position: static; transform: none; width: 1.3rem; height: 1.3rem; font-size: 0.75rem; }
+
+/* Detail dialog */
+dialog {
+  width: min(720px, calc(100% - 1.5rem)); max-height: calc(100% - 2rem);
+  border: 2px solid var(--blue); border-radius: 4px; padding: 0;
+  background: var(--surface); color: var(--ink);
+}
+dialog::backdrop { background: rgba(10, 20, 40, 0.55); }
+.dlg { padding: 1.5rem; }
+.dlg-head { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
+.dlg h2 { margin: 0; font-size: 1.35rem; }
+.close { font: inherit; font-size: 1.4rem; line-height: 1; padding: 0.3rem 0.6rem; background: none; border: 1px solid var(--grid); color: var(--ink); border-radius: 4px; cursor: pointer; }
+.forms { display: grid; grid-template-columns: repeat(3, 1fr); margin: 1.25rem 0; border: 1px solid var(--grid); }
+.form { text-align: center; padding: 1rem 0.5rem; border-right: 1px solid var(--grid); }
+.form:last-child { border-right: 0; }
+.form .big { font-size: 3.4rem; font-weight: 800; line-height: 1.15; color: var(--blue); }
+.form .lang { font-size: 0.85rem; color: var(--muted); }
+.form .rd { font-size: 1.05rem; margin-top: 0.2rem; }
+.form.changed .big { color: var(--seal); }
+.kr { font-family: var(--hanja-kr); } .jp { font-family: var(--hanja-jp); } .cn { font-family: var(--hanja-cn); }
+.table-wrap { overflow-x: auto; border: 1px solid var(--grid); }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 0.95rem; }
+th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { font-weight: 600; font-size: 0.85rem; color: var(--muted); background: var(--paper); }
+tr:last-child td { border-bottom: 0; }
+td small { display: block; color: var(--muted); font-size: 0.8rem; }
+td.diff { color: var(--seal); }
+.note { margin-top: 1.25rem; padding: 0.9rem 1rem; border-left: 4px solid var(--seal); background: var(--seal-soft); }
+.note.plain { border-left-color: var(--blue); background: var(--paper); }
+
+footer { margin: 3.5rem 0 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--grid); color: var(--muted); font-size: 0.92rem; }
+footer .yon { font-family: var(--hanja-kr); font-size: 1.5rem; color: var(--blue); font-weight: 800; margin-right: 0.4rem; }
+
+@media (max-width: 640px) {
+  .hero { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 2.5rem; }
+  .board { grid-template-columns: repeat(2, 1fr); }
+  .cell { min-height: 165px; }
+  .cell .ch { font-size: 3rem; }
+  .form .big { font-size: 2.6rem; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-char" lang="ko" aria-hidden="true">學</div>
+    <div>
+      <ul class="readings" aria-label="Readings of 學">
+        <li><b lang="ko">학</b><span>Korean</span></li>
+        <li><b lang="ja">がく</b><span>Japanese</span></li>
+        <li><b lang="zh">xué</b><span>Chinese</span></li>
+      </ul>
+      <h1>One character, three languages</h1>
+      <p class="lede">Korean, Japanese, and Chinese share thousands of words built from the same characters. Pick a character to see its word family in all three, and the places where they quietly part ways.</p>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="filters" role="group" aria-label="Filter characters">
+      <button type="button" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" data-filter="ff" aria-pressed="false">False friends</button>
+      <button type="button" data-filter="shape" aria-pressed="false">Shape changed</button>
+    </div>
+    <input class="search" type="search" placeholder="Search 學, 학, がく, xué, or learn" aria-label="Search characters">
+  </div>
+
+  <section class="board" id="board" aria-label="Characters"></section>
+  <p class="legend"><span class="seal" lang="zh">注</span> Watch out: at least one word means something different across the three languages.</p>
+
+  <footer>
+    <p><span class="yon" lang="ko">延世</span>Yonsei's own name is hanja: 延 from Yonhi College and 世 from Severance, the two schools that merged to form it. Find 世 in the grid above.</p>
+    <p>Made for the Yonsei RC program.</p>
+  </footer>
+</main>
+
+<dialog id="detail" aria-labelledby="dlg-title"><div class="dlg" id="dlg-body"></div></dialog>
+
+<script>
+const DATA = [
+  { kr:"學", jp:"学", cn:"学", hun:"배울 학", ko:"학", ja:"がく", zh:"xué", en:"learn, study",
+    words:[
+      {ko:"학교", h:"學校", ja:"学校", jak:"がっこう", zh:"学校", py:"xuéxiào", en:"school"},
+      {ko:"학생", h:"學生", ja:"学生", jak:"がくせい", zh:"学生", py:"xuésheng", en:"student"},
+      {ko:"대학", h:"大學", ja:"大学", jak:"だいがく", zh:"大学", py:"dàxué", en:"university"},
+      {ko:"과학", h:"科學", ja:"科学", jak:"かがく", zh:"科学", py:"kēxué", en:"science"}],
+    note:"Korean hanja keeps the traditional 學. Japan and mainland China both simplified it, and happened to land on the same shape, 学.", ff:false },
+  { kr:"國", jp:"国", cn:"国", hun:"나라 국", ko:"국", ja:"こく", zh:"guó", en:"country",
+    words:[
+      {ko:"국가", h:"國家", ja:"国家", jak:"こっか", zh:"国家", py:"guójiā", en:"nation, state"},
+      {ko:"외국", h:"外國", ja:"外国", jak:"がいこく", zh:"外国", py:"wàiguó", en:"foreign country"},
+      {ko:"국제", h:"國際", ja:"国際", jak:"こくさい", zh:"国际", py:"guójì", en:"international"},
+      {ko:"한국", h:"韓國", ja:"韓国", jak:"かんこく", zh:"韩国", py:"Hánguó", en:"Korea"}],
+    note:"국제 is the 국제 in 국제학, International Studies.", ff:false },
+  { kr:"大", jp:"大", cn:"大", hun:"큰 대", ko:"대", ja:"だい・たい", zh:"dà", en:"big, great",
+    words:[
+      {ko:"대학", h:"大學", ja:"大学", jak:"だいがく", zh:"大学", py:"dàxué", en:"university"},
+      {ko:"대사관", h:"大使館", ja:"大使館", jak:"たいしかん", zh:"大使馆", py:"dàshǐguǎn", en:"embassy"},
+      {ko:"대통령", h:"大統領", ja:"大統領", jak:"だいとうりょう", zh:"总统", py:"zǒngtǒng", en:"president", zhDiff:true}],
+    note:"Korean and Japanese say 大統領 for a president. Chinese uses a different word entirely: 总统.", ff:true },
+  { kr:"人", jp:"人", cn:"人", hun:"사람 인", ko:"인", ja:"じん・にん", zh:"rén", en:"person",
+    words:[
+      {ko:"인구", h:"人口", ja:"人口", jak:"じんこう", zh:"人口", py:"rénkǒu", en:"population"},
+      {ko:"외국인", h:"外國人", ja:"外国人", jak:"がいこくじん", zh:"外国人", py:"wàiguórén", en:"foreigner"},
+      {ko:"인생", h:"人生", ja:"人生", jak:"じんせい", zh:"人生", py:"rénshēng", en:"life (one's life)"}],
+    note:"Japanese reads 人 two ways: じん for nationality (アメリカ人) and にん for counting (三人).", ff:false },
+  { kr:"生", jp:"生", cn:"生", hun:"날 생", ko:"생", ja:"せい・しょう", zh:"shēng", en:"life, birth",
+    words:[
+      {ko:"학생", h:"學生", ja:"学生", jak:"がくせい", zh:"学生", py:"xuésheng", en:"student"},
+      {ko:"선생", h:"先生", ja:"先生", jak:"せんせい", zh:"先生", py:"xiānsheng", en:"teacher (KR/JP), Mr. (CN)", diff:true},
+      {ko:"생일", h:"生日", ja:"誕生日", jak:"たんじょうび", zh:"生日", py:"shēngrì", en:"birthday", jaDiff:true}],
+    note:"先生 means teacher in Korean and Japanese, but in Chinese it's just Mr. or sir. Call your Chinese professor 先生 and you've called them Mr.", ff:true },
+  { kr:"電", jp:"電", cn:"电", hun:"번개 전", ko:"전", ja:"でん", zh:"diàn", en:"lightning, electricity",
+    words:[
+      {ko:"전화", h:"電話", ja:"電話", jak:"でんわ", zh:"电话", py:"diànhuà", en:"telephone"},
+      {ko:"전자", h:"電子", ja:"電子", jak:"でんし", zh:"电子", py:"diànzǐ", en:"electron, electronic"},
+      {ko:"전차", h:"電車", ja:"電車", jak:"でんしゃ", zh:"电车", py:"diànchē", en:"streetcar / train / tram", diff:true}],
+    note:"電車 is the everyday word for a train in Japan. In Korean 전차 is an old word for a streetcar, and in Chinese 电车 is a tram or trolleybus.", ff:true },
+  { kr:"食", jp:"食", cn:"食", hun:"먹을 식", ko:"식", ja:"しょく", zh:"shí", en:"eat, food",
+    words:[
+      {ko:"식당", h:"食堂", ja:"食堂", jak:"しょくどう", zh:"食堂", py:"shítáng", en:"cafeteria, restaurant"},
+      {ko:"식품", h:"食品", ja:"食品", jak:"しょくひん", zh:"食品", py:"shípǐn", en:"food product"},
+      {ko:"음식", h:"飮食", ja:"飲食", jak:"いんしょく", zh:"饮食", py:"yǐnshí", en:"food (KR), eating & drinking (JP/CN)", diff:true}],
+    note:"Not every 식 is 食. 식물 (plant) is 植物, a completely different character with the same Korean sound.", ff:true },
+  { kr:"中", jp:"中", cn:"中", hun:"가운데 중", ko:"중", ja:"ちゅう", zh:"zhōng", en:"middle",
+    words:[
+      {ko:"중국", h:"中國", ja:"中国", jak:"ちゅうごく", zh:"中国", py:"Zhōngguó", en:"China"},
+      {ko:"중심", h:"中心", ja:"中心", jak:"ちゅうしん", zh:"中心", py:"zhōngxīn", en:"center"},
+      {ko:"중학교", h:"中學校", ja:"中学校", jak:"ちゅうがっこう", zh:"中学", py:"zhōngxué", en:"middle school"}],
+    note:"In China, 中学 covers both middle school and high school.", ff:false },
+  { kr:"心", jp:"心", cn:"心", hun:"마음 심", ko:"심", ja:"しん", zh:"xīn", en:"heart, mind",
+    words:[
+      {ko:"중심", h:"中心", ja:"中心", jak:"ちゅうしん", zh:"中心", py:"zhōngxīn", en:"center"},
+      {ko:"안심", h:"安心", ja:"安心", jak:"あんしん", zh:"安心", py:"ānxīn", en:"relief, peace of mind"},
+      {ko:"심리", h:"心理", ja:"心理", jak:"しんり", zh:"心理", py:"xīnlǐ", en:"psychology"}],
+    note:"心 also hides inside other characters as the side-form 忄, as in 情 (feeling) and 性 (nature).", ff:false },
+  { kr:"文", jp:"文", cn:"文", hun:"글월 문", ko:"문", ja:"ぶん・もん", zh:"wén", en:"writing, culture",
+    words:[
+      {ko:"문화", h:"文化", ja:"文化", jak:"ぶんか", zh:"文化", py:"wénhuà", en:"culture"},
+      {ko:"문학", h:"文學", ja:"文学", jak:"ぶんがく", zh:"文学", py:"wénxué", en:"literature"},
+      {ko:"문법", h:"文法", ja:"文法", jak:"ぶんぽう", zh:"语法", py:"yǔfǎ", en:"grammar", zhDiff:true}],
+    note:"Korean and Japanese say 文法 for grammar. Chinese usually says 语法.", ff:true },
+  { kr:"社", jp:"社", cn:"社", hun:"모일 사", ko:"사", ja:"しゃ", zh:"shè", en:"society, company",
+    words:[
+      {ko:"사회", h:"社會", ja:"社会", jak:"しゃかい", zh:"社会", py:"shèhuì", en:"society"},
+      {ko:"회사", h:"會社", ja:"会社", jak:"かいしゃ", zh:"公司", py:"gōngsī", en:"company", zhDiff:true},
+      {ko:"사장", h:"社長", ja:"社長", jak:"しゃちょう", zh:"社长", py:"shèzhǎng", en:"company president"}],
+    note:"Flip 社會 (society) and you get 會社 (company) in Korean and Japanese. Chinese doesn't use 会社 at all; a company is 公司.", ff:true },
+  { kr:"愛", jp:"愛", cn:"爱", hun:"사랑 애", ko:"애", ja:"あい", zh:"ài", en:"love",
+    words:[
+      {ko:"애인", h:"愛人", ja:"愛人", jak:"あいじん", zh:"爱人", py:"àiren", en:"sweetheart / mistress / spouse", diff:true},
+      {ko:"애국", h:"愛國", ja:"愛国", jak:"あいこく", zh:"爱国", py:"àiguó", en:"patriotism"},
+      {ko:"연애", h:"戀愛", ja:"恋愛", jak:"れんあい", zh:"恋爱", py:"liàn'ài", en:"romance, dating"}],
+    note:"The famous one. 애인 is your boyfriend or girlfriend in Korean, your secret lover in Japanese, and your husband or wife in mainland Chinese.", ff:true },
+  { kr:"手", jp:"手", cn:"手", hun:"손 수", ko:"수", ja:"しゅ", zh:"shǒu", en:"hand",
+    words:[
+      {ko:"가수", h:"歌手", ja:"歌手", jak:"かしゅ", zh:"歌手", py:"gēshǒu", en:"singer"},
+      {ko:"선수", h:"選手", ja:"選手", jak:"せんしゅ", zh:"选手", py:"xuǎnshǒu", en:"athlete, player"},
+      {ko:"수술", h:"手術", ja:"手術", jak:"しゅじゅつ", zh:"手术", py:"shǒushù", en:"surgery"}],
+    note:"手紙 is a letter in Japanese. Write the same thing in Chinese, 手纸, and it means toilet paper.", ff:true },
+  { kr:"東", jp:"東", cn:"东", hun:"동녘 동", ko:"동", ja:"とう", zh:"dōng", en:"east",
+    words:[
+      {ko:"동양", h:"東洋", ja:"東洋", jak:"とうよう", zh:"东洋", py:"dōngyáng", en:"the East (KR/JP), Japan (CN)", diff:true},
+      {ko:"동방", h:"東方", ja:"東方", jak:"とうほう", zh:"东方", py:"dōngfāng", en:"the east"},
+      {ko:"동서", h:"東西", ja:"東西", jak:"とうざい", zh:"东西", py:"dōngxi", en:"east and west / thing", diff:true}],
+    note:"東西 means east and west in Korean and Japanese. In Chinese, 东西 (dōngxi) usually just means stuff or a thing.", ff:true },
+  { kr:"世", jp:"世", cn:"世", hun:"인간 세", ko:"세", ja:"せ・せい", zh:"shì", en:"world, generation",
+    words:[
+      {ko:"세계", h:"世界", ja:"世界", jak:"せかい", zh:"世界", py:"shìjiè", en:"world"},
+      {ko:"세대", h:"世代", ja:"世代", jak:"せだい", zh:"世代", py:"shìdài", en:"generation"},
+      {ko:"연세", h:"延世", ja:"延世", jak:"ヨンセ", zh:"延世", py:"Yánshì", en:"Yonsei (the university's name)"}],
+    note:"The 世 in 延世 comes from Severance, one of the two schools that merged into Yonsei.", ff:false }
+];
+
+const board = document.getElementById("board");
+const search = document.querySelector(".search");
+const dialog = document.getElementById("detail");
+const body = document.getElementById("dlg-body");
+let filter = "all";
+
+const shapeChanged = d => d.jp !== d.kr || d.cn !== d.kr;
+
+function render() {
+  const q = search.value.trim().toLowerCase();
+  const list = DATA.filter(d => {
+    if (filter === "ff" && !d.ff) return false;
+    if (filter === "shape" && !shapeChanged(d)) return false;
+    if (!q) return true;
+    const hay = [d.kr, d.jp, d.cn, d.hun, d.ko, d.ja, d.zh, d.en,
+      ...d.words.flatMap(w => [w.ko, w.h, w.ja, w.jak, w.zh, w.py, w.en])].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+  board.innerHTML = list.length ? list.map(d => {
+    const i = DATA.indexOf(d);
+    return `<button class="cell" type="button" data-i="${i}" aria-label="${d.kr}, ${d.en}">
+      ${d.ff ? '<span class="seal" lang="zh" aria-hidden="true">注</span>' : ""}
+      <span class="ch" lang="ko">${d.kr}</span>
+      <span class="tri"><span lang="ko">${d.ko}</span><span lang="ja">${d.ja.split("・")[0]}</span><span lang="zh">${d.zh}</span></span>
+      <span class="mean">${d.en}</span>
+    </button>`;
+  }).join("") : `<p class="empty">No characters match "${search.value.replace(/[<>&"]/g, "")}". Try a hanja, a Korean syllable, or an English meaning like "east".</p>`;
+}
+
+function open(i) {
+  const d = DATA[i];
+  body.innerHTML = `
+    <div class="dlg-head">
+      <div><h2 id="dlg-title">${d.kr}: ${d.en}</h2><div lang="ko" style="color:var(--muted)">${d.hun}</div></div>
+      <button class="close" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="forms">
+      <div class="form"><div class="big kr" lang="ko">${d.kr}</div><div class="lang">Korean</div><div class="rd" lang="ko">${d.ko}</div></div>
+      <div class="form ${d.jp !== d.kr ? "changed" : ""}"><div class="big jp" lang="ja">${d.jp}</div><div class="lang">Japanese</div><div class="rd" lang="ja">${d.ja}</div></div>
+      <div class="form ${d.cn !== d.kr ? "changed" : ""}"><div class="big cn" lang="zh-CN">${d.cn}</div><div class="lang">Chinese</div><div class="rd">${d.zh}</div></div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Korean</th><th>Japanese</th><th>Chinese</th><th>Meaning</th></tr></thead>
+      <tbody>${d.words.map(w => `<tr>
+        <td><span lang="ko">${w.ko}</span><small class="kr" lang="ko">${w.h}</small></td>
+        <td class="${w.jaDiff ? "diff" : ""}"><span class="jp" lang="ja">${w.ja}</span><small lang="ja">${w.jak}</small></td>
+        <td class="${w.zhDiff ? "diff" : ""}"><span class="cn" lang="zh-CN">${w.zh}</span><small>${w.py}</small></td>
+        <td class="${w.diff ? "diff" : ""}">${w.en}</td></tr>`).join("")}</tbody>
+    </table></div>
+    <p class="note ${d.ff ? "" : "plain"}">${d.note}</p>`;
+  body.querySelector(".close").addEventListener("click", () => dialog.close());
+  dialog.showModal();
+}
+
+board.addEventListener("click", e => {
+  const c = e.target.closest(".cell");
+  if (c) open(+c.dataset.i);
+});
+dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });
+search.addEventListener("input", render);
+document.querySelectorAll(".filters button").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.filter;
+  document.querySelectorAll(".filters button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+}));
+render();
+</script>
+</body>
+</html>
